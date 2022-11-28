@@ -1,18 +1,24 @@
-module "vpc" {
-  source   = "./modules/vpc"
-  vpc_name = var.vpc_name
-  #azs    = aws.west1
-  azs             = var.azs
-  cidr            = var.cidr_range
-  private_subnets = slice(cidrsubnets(var.cidr_range, 8, 8, 8, 8), 0, 2)
-  public_subnets  = slice(cidrsubnets(var.cidr_range, 8, 8, 8, 8), 2, 4)
+# Kubernetes provider
+# https://learn.hashicorp.com/terraform/kubernetes/provision-eks-cluster#optional-configure-terraform-kubernetes-provider
+# To learn how to schedule deployments and services using the provider, go here: https://learn.hashicorp.com/terraform/kubernetes/deploy-nginx-kubernetes
+# The Kubernetes provider is included in this file so the EKS module can complete successfully. Otherwise, it throws an error when creating `kubernetes_config_map.aws_auth`.
+# You should **not** schedule deployments and services in this workspace. This keeps workspaces modular (one for provision EKS, another for scheduling Kubernetes resources) as per best practices.
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 }
 
-module "ec2" {
-  source           = "./modules/ec2"
-  webInstance_ami  = "ami-0022f774911c1d690"
-  webInstance_type = "t2.micro"
-  security_groups  = [module.vpc.security_group_public]
-  subnets          = module.vpc.vpc_public_subnets
+provider "aws" {
+  region = var.region
 }
 
+data "aws_availability_zones" "available" {}
+
+locals {
+  cluster_name = "exercise-eks-${random_string.suffix.result}"
+}
+
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+}
