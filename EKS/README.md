@@ -8,7 +8,7 @@
 
 ## let's go
 This code will provision 3 node EKS cluster with support for LB<br/>
-Clone the repository: [checkout_code]("git@github.com:sameer1701/terraform-mgmt.git")<br/>
+Clone the repository: [checkout_code](https://github.com/sameer1701/terraform-mgmt/blob/master/EKS)<br/>
 Adjust values from values file as per your need<br/>
 
 Run below commands, verify terraform plan and go for apply <br/>
